@@ -1,0 +1,301 @@
+﻿#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# -*- Python -*-
+
+"""
+ @file CameraAcivator.py
+ @brief Activate or Deactivate camera 1 / 2
+ @date $Date$
+
+
+"""
+import sys
+import time
+import subprocess
+sys.path.append(".")
+
+# Import RTM module
+import RTC
+import OpenRTM_aist
+
+
+# Import Service implementation class
+# <rtc-template block="service_impl">
+
+# </rtc-template>
+
+# Import Service stub modules
+# <rtc-template block="consumer_import">
+# </rtc-template>
+
+
+# This module's spesification
+# <rtc-template block="module_spec">
+cameraacivator_spec = ["implementation_id", "CameraAcivator", 
+		 "type_name",         "CameraAcivator", 
+		 "description",       "Activate or Deactivate camera 1 / 2", 
+		 "version",           "1.0.0", 
+		 "vendor",            "m.toyoda", 
+		 "category",          "Controller", 
+		 "activity_type",     "STATIC", 
+		 "max_instance",      "1", 
+		 "language",          "Python", 
+		 "lang_type",         "SCRIPT",
+		 ""]
+# </rtc-template>
+
+##
+# @class CameraAcivator
+# @brief Activate or Deactivate camera 1 / 2
+# 
+# camera選択でactivate, deactivate
+# 
+# 
+class CameraAcivator(OpenRTM_aist.DataFlowComponentBase):
+	
+	##
+	# @brief constructor
+	# @param manager Maneger Object
+	# 
+	def __init__(self, manager):
+		OpenRTM_aist.DataFlowComponentBase.__init__(self, manager)
+
+		
+		"""
+		camera1: True
+		camera2: False
+		"""
+		self._d_select_camera = OpenRTM_aist.instantiateDataType(RTC.TimedBoolean)
+		self._select_cameraIn = OpenRTM_aist.InPort("select_camera", self._d_select_camera)
+
+
+		
+
+
+		# initialize of configuration-data.
+		# <rtc-template block="init_conf_param">
+		
+		# </rtc-template>
+
+
+		 
+	##
+	#
+	# The initialize action (on CREATED->ALIVE transition)
+	# formaer rtc_init_entry() 
+	# 
+	# @return RTC::ReturnCode_t
+	# 
+	#
+	def onInitialize(self):
+		# Bind variables and configuration variable
+		
+		# Set InPort buffers
+		self.addInPort("select_camera",self._select_cameraIn)
+		
+		
+		# Set OutPort buffers
+		
+		# Set service provider to Ports
+		
+		# Set service consumers to Ports
+		
+		# Set CORBA Service Ports
+		
+		return RTC.RTC_OK
+	
+	###
+	## 
+	## The finalize action (on ALIVE->END transition)
+	## formaer rtc_exiting_entry()
+	## 
+	## @return RTC::ReturnCode_t
+	#
+	## 
+	#def onFinalize(self):
+	#
+	#	return RTC.RTC_OK
+	
+	###
+	##
+	## The startup action when ExecutionContext startup
+	## former rtc_starting_entry()
+	## 
+	## @param ec_id target ExecutionContext Id
+	##
+	## @return RTC::ReturnCode_t
+	##
+	##
+	#def onStartup(self, ec_id):
+	#
+	#	return RTC.RTC_OK
+	
+	###
+	##
+	## The shutdown action when ExecutionContext stop
+	## former rtc_stopping_entry()
+	##
+	## @param ec_id target ExecutionContext Id
+	##
+	## @return RTC::ReturnCode_t
+	##
+	##
+	#def onShutdown(self, ec_id):
+	#
+	#	return RTC.RTC_OK
+	
+	##
+	#
+	# The activated action (Active state entry action)
+	# former rtc_active_entry()
+	#
+	# @param ec_id target ExecutionContext Id
+	# 
+	# @return RTC::ReturnCode_t
+	#
+	#
+	def onActivated(self, ec_id):
+		#subprocess.call("rtcwd localhost")
+		#subprocess.call("rtcwd MSI.host_cxt")
+		return RTC.RTC_OK
+	
+	##
+	#
+	# The deactivated action (Active state exit action)
+	# former rtc_active_exit()
+	#
+	# @param ec_id target ExecutionContext Id
+	#
+	# @return RTC::ReturnCode_t
+	#
+	#
+	def onDeactivated(self, ec_id):
+	
+		return RTC.RTC_OK
+	
+	##
+	#
+	# The execution action that is invoked periodically
+	# former rtc_active_do()
+	#
+	# @param ec_id target ExecutionContext Id
+	#
+	# @return RTC::ReturnCode_t
+	#
+	#
+	def onExecute(self, ec_id):
+		if self._select_cameraIn.isNew():
+			self._in = self._select_cameraIn.read()
+
+			#_path = "/192.168.215.62/rsdlab.host_cxt/"
+			#_path = "/192.168.215.61/DESKTOP-I7QNMGG.host_cxt/"
+			_path = "/192.168.215.51/DESKTOP-I7QNMGG.host_cxt/"
+			if self._in.data:
+				#print(self._in)
+				subprocess.call("rtact " + _path + "WebCamera0.rtc")
+				subprocess.call("rtdeact "  + _path +  "WebCamera1.rtc")
+				print("1")
+			if not(self._in.data):
+				subprocess.call("rtact "  + _path + "WebCamera1.rtc")
+				subprocess.call("rtdeact "  + _path + "WebCamera0.rtc")
+				print("2")
+			
+		
+	
+		return RTC.RTC_OK
+	
+	###
+	##
+	## The aborting action when main logic error occurred.
+	## former rtc_aborting_entry()
+	##
+	## @param ec_id target ExecutionContext Id
+	##
+	## @return RTC::ReturnCode_t
+	##
+	##
+	#def onAborting(self, ec_id):
+	#
+	#	return RTC.RTC_OK
+	
+	###
+	##
+	## The error action in ERROR state
+	## former rtc_error_do()
+	##
+	## @param ec_id target ExecutionContext Id
+	##
+	## @return RTC::ReturnCode_t
+	##
+	##
+	#def onError(self, ec_id):
+	#
+	#	return RTC.RTC_OK
+	
+	###
+	##
+	## The reset action that is invoked resetting
+	## This is same but different the former rtc_init_entry()
+	##
+	## @param ec_id target ExecutionContext Id
+	##
+	## @return RTC::ReturnCode_t
+	##
+	##
+	#def onReset(self, ec_id):
+	#
+	#	return RTC.RTC_OK
+	
+	###
+	##
+	## The state update action that is invoked after onExecute() action
+	## no corresponding operation exists in OpenRTm-aist-0.2.0
+	##
+	## @param ec_id target ExecutionContext Id
+	##
+	## @return RTC::ReturnCode_t
+	##
+
+	##
+	#def onStateUpdate(self, ec_id):
+	#
+	#	return RTC.RTC_OK
+	
+	###
+	##
+	## The action that is invoked when execution context's rate is changed
+	## no corresponding operation exists in OpenRTm-aist-0.2.0
+	##
+	## @param ec_id target ExecutionContext Id
+	##
+	## @return RTC::ReturnCode_t
+	##
+	##
+	#def onRateChanged(self, ec_id):
+	#
+	#	return RTC.RTC_OK
+	
+
+
+
+def CameraAcivatorInit(manager):
+    profile = OpenRTM_aist.Properties(defaults_str=cameraacivator_spec)
+    manager.registerFactory(profile,
+                            CameraAcivator,
+                            OpenRTM_aist.Delete)
+
+def MyModuleInit(manager):
+    CameraAcivatorInit(manager)
+
+    # Create a component
+    comp = manager.createComponent("CameraAcivator")
+
+def main():
+	mgr = OpenRTM_aist.Manager.init(sys.argv)
+	mgr.setModuleInitProc(MyModuleInit)
+	mgr.activateManager()
+	mgr.runManager()
+
+if __name__ == "__main__":
+	main()
+
